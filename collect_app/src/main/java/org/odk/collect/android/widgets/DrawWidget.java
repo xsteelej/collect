@@ -45,64 +45,15 @@ public class DrawWidget extends BaseImageWidget {
 
     public DrawWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
-        setUpLayout();
-        setUpBinary();
-        addAnswerView(answerLayout);
     }
 
     @Override
-    public void onImageClick() {
-        Collect.getInstance()
-                .getActivityLogger()
-                .logInstanceAction(this, "viewImage", "click",
-                        getFormEntryPrompt().getIndex());
-        launchDrawActivity();
+    protected void setupButtons() {
+        drawButton = super.setupSingleButton(getContext().getString(R.string.draw_image));
     }
 
     @Override
-    protected void setUpLayout() {
-        super.setUpLayout();
-        drawButton = getSimpleButton(getContext().getString(R.string.draw_image));
-        drawButton.setEnabled(!getFormEntryPrompt().isReadOnly());
-
-        answerLayout.addView(drawButton);
-        answerLayout.addView(errorTextView);
-
-        if (getFormEntryPrompt().isReadOnly()) {
-            drawButton.setVisibility(View.GONE);
-        }
-        errorTextView.setVisibility(View.GONE);
-    }
-
-    private void launchDrawActivity() {
-        errorTextView.setVisibility(View.GONE);
-        Intent i = new Intent(getContext(), DrawActivity.class);
-        i.putExtra(DrawActivity.OPTION, DrawActivity.OPTION_DRAW);
-        // copy...
-        if (binaryName != null) {
-            File f = new File(getInstanceFolder() + File.separator + binaryName);
-            i.putExtra(DrawActivity.REF_IMAGE, Uri.fromFile(f));
-        }
-        i.putExtra(DrawActivity.EXTRA_OUTPUT,
-                Uri.fromFile(new File(Collect.TMPFILE_PATH)));
-
-        try {
-            waitForData();
-            ((Activity) getContext()).startActivityForResult(i,
-                    RequestCodes.DRAW_IMAGE);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(
-                    getContext(),
-                    getContext().getString(R.string.activity_not_found,
-                            getContext().getString(R.string.draw_image)), Toast.LENGTH_SHORT).show();
-            cancelWaitingForData();
-        }
-    }
-
-    @Override
-    public void clearAnswer() {
-        super.clearAnswer();
-        // reset buttons
+    public void setButtonText() {
         drawButton.setText(getContext().getString(R.string.draw_image));
     }
 
@@ -124,6 +75,6 @@ public class DrawWidget extends BaseImageWidget {
                 .getActivityLogger()
                 .logInstanceAction(this, "drawButton", "click",
                         getFormEntryPrompt().getIndex());
-        launchDrawActivity();
+        launchActivity();
     }
 }

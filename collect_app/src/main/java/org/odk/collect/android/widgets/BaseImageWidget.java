@@ -16,23 +16,32 @@
 
 package org.odk.collect.android.widgets;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.core.model.data.StringData;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
+import org.odk.collect.android.activities.DrawActivity;
+import org.odk.collect.android.application.Collect;
+import org.odk.collect.android.utilities.ApplicationConstants;
 import org.odk.collect.android.utilities.FileUtils;
 import org.odk.collect.android.utilities.MediaManager;
 import org.odk.collect.android.utilities.ViewIds;
@@ -51,6 +60,9 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
 
     public BaseImageWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
+        setUpLayout();
+        setUpBinary();
+        addAnswerView(answerLayout);
     }
 
     @Override
@@ -66,7 +78,11 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
         }
 
         errorTextView.setVisibility(View.GONE);
+        setButtonText();
     }
+
+    // TODO: decide if this should be abstract
+    protected void setButtonText() { }
 
     @Override
     public void deleteFile() {
@@ -158,7 +174,43 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
         }
     }
 
-    protected abstract void onImageClick();
+    public void onImageClick() {
+        Collect.getInstance().getActivityLogger().logInstanceAction(
+                this,
+                "viewImage",
+                "click",
+                getFormEntryPrompt().getIndex());
+
+        launchActivity();
+    }
+
+    protected void launchActivity() {
+        launchDrawActivity();
+    }
+
+    protected void launchDrawActivity() {
+        errorTextView.setVisibility(View.GONE);
+        Intent i = new Intent(getContext(), DrawActivity.class);
+        i.putExtra(DrawActivity.OPTION, DrawActivity.OPTION_SIGNATURE);
+        // copy...
+        if (binaryName != null) {
+            File f = new File(getInstanceFolder() + File.separator + binaryName);
+            i.putExtra(DrawActivity.REF_IMAGE, Uri.fromFile(f));
+        }
+        i.putExtra(DrawActivity.EXTRA_OUTPUT,
+                Uri.fromFile(new File(Collect.TMPFILE_PATH)));
+
+        try {
+            waitForData();
+            ((Activity) getContext()).startActivityForResult(i,
+                    ApplicationConstants.RequestCodes.SIGNATURE_CAPTURE);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(getContext(),
+                    getContext().getString(R.string.activity_not_found, getContext().getString(R.string.signature_capture)),
+                    Toast.LENGTH_SHORT).show();
+            cancelWaitingForData();
+        }
+    }
 
     protected void setUpLayout() {
         errorTextView = new TextView(getContext());
@@ -169,5 +221,27 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
         answerLayout.setOrientation(LinearLayout.VERTICAL);
 
         binaryName = getFormEntryPrompt().getAnswerText();
+
+        setupButtons();
     }
+
+    // TODO: decide if this should be abstract
+    protected void setupButtons() {}
+
+    protected Button setupSingleButton(@NonNull String text) {
+        Button button = getSimpleButton(text);
+        button.setEnabled(!getFormEntryPrompt().isReadOnly());
+
+        answerLayout.addView(button);
+        answerLayout.addView(errorTextView);
+
+        // and hide the sign button if read-only
+        if (getFormEntryPrompt().isReadOnly()) {
+            button.setVisibility(View.GONE);
+        }
+        errorTextView.setVisibility(View.GONE);
+
+        return button;
+    }
+
 }

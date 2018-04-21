@@ -53,9 +53,6 @@ public class ImageWidget extends BaseImageWidget {
 
     public ImageWidget(Context context, final FormEntryPrompt prompt) {
         super(context, prompt);
-        setUpLayout();
-        setUpBinary();
-        addAnswerView(answerLayout);
     }
 
     @Override

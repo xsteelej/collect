@@ -68,9 +68,6 @@ public class AlignedImageWidget extends BaseImageWidget {
 
     public AlignedImageWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
-        setUpLayout();
-        setUpBinary();
-        addAnswerView(answerLayout);
     }
 
     @Override

@@ -54,9 +54,6 @@ public class AnnotateWidget extends BaseImageWidget {
 
     public AnnotateWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
-        setUpLayout();
-        setUpBinary();
-        addAnswerView(answerLayout);
     }
 
     @Override
