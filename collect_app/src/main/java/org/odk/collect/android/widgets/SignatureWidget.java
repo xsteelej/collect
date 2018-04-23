@@ -43,6 +43,7 @@ public class SignatureWidget extends BaseImageWidget {
 
     public SignatureWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
+        super.setup();
     }
 
     @Override

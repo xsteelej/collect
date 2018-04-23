@@ -53,6 +53,7 @@ public class ImageWidget extends BaseImageWidget {
 
     public ImageWidget(Context context, final FormEntryPrompt prompt) {
         super(context, prompt);
+        super.setup();
     }
 
     @Override
@@ -92,11 +93,9 @@ public class ImageWidget extends BaseImageWidget {
 
         answerLayout.addView(captureButton);
         answerLayout.addView(chooseButton);
-        answerLayout.addView(errorTextView);
 
         hideButtonsIfNeeded(appearance);
         errorTextView.setVisibility(View.GONE);
-
 
         if (selfie) {
             boolean isFrontCameraAvailable;

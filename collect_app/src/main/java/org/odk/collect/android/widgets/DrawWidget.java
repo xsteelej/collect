@@ -45,6 +45,7 @@ public class DrawWidget extends BaseImageWidget {
 
     public DrawWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
+        super.setup();
     }
 
     @Override

@@ -61,6 +61,9 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
 
     public BaseImageWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
+    }
+
+    protected void setup() {
         setUpLayout();
         setUpBinary();
         addAnswerView(answerLayout);
@@ -152,7 +155,7 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
     protected void setOnLongClickListenerForButtons(OnLongClickListener l) {
     }
 
-        @Override
+    @Override
     public void cancelLongPress() {
         cancelLongPressForButtons();
         super.cancelLongPress();
@@ -212,6 +215,7 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
         }
         i.putExtra(DrawActivity.EXTRA_OUTPUT,
                 Uri.fromFile(new File(Collect.TMPFILE_PATH)));
+        addIntentExtras(i);
 
         try {
             waitForData();
@@ -224,18 +228,22 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
         }
     }
 
+    // TODO: Shoud be abstract
+    protected void addIntentExtras(Intent intent) {
+
+    }
+
     protected void setUpLayout() {
         errorTextView = new TextView(getContext());
         errorTextView.setId(ViewIds.generateViewId());
         errorTextView.setText(R.string.selected_invalid_image);
+        errorTextView.setVisibility(View.GONE);
 
         answerLayout = new LinearLayout(getContext());
         answerLayout.setOrientation(LinearLayout.VERTICAL);
+        answerLayout.addView(errorTextView);
 
         binaryName = getFormEntryPrompt().getAnswerText();
-
-        answerLayout.addView(errorTextView);
-        errorTextView.setVisibility(View.GONE);
 
         setupButtons();
     }

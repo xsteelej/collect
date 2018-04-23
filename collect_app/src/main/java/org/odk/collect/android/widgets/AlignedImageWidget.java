@@ -68,6 +68,7 @@ public class AlignedImageWidget extends BaseImageWidget {
 
     public AlignedImageWidget(Context context, FormEntryPrompt prompt) {
         super(context, prompt);
+        super.setup();
     }
 
     @Override
@@ -114,7 +115,6 @@ public class AlignedImageWidget extends BaseImageWidget {
 
         answerLayout.addView(captureButton);
         answerLayout.addView(chooseButton);
-        answerLayout.addView(errorTextView);
 
         // and hide the capture and choose button if read-only
         if (getFormEntryPrompt().isReadOnly()) {
