@@ -49,7 +49,7 @@ public class DrawWidget extends BaseImageWidget {
 
     @Override
     protected void setupButtons() {
-        drawButton = super.setupSingleButton(getContext().getString(R.string.draw_image));
+        drawButton = super.setupSingleButton(getContext().getString(R.string.draw_image),R.id.simple_button);
     }
 
     @Override
@@ -58,23 +58,25 @@ public class DrawWidget extends BaseImageWidget {
     }
 
     @Override
-    public void setOnLongClickListener(OnLongClickListener l) {
+    protected void setOnLongClickListenerForButtons(OnLongClickListener l) {
         drawButton.setOnLongClickListener(l);
-        super.setOnLongClickListener(l);
     }
 
     @Override
-    public void cancelLongPress() {
-        super.cancelLongPress();
+    protected void cancelLongPressForButtons() {
         drawButton.cancelLongPress();
     }
 
     @Override
-    public void onButtonClick(int buttonId) {
-        Collect.getInstance()
-                .getActivityLogger()
-                .logInstanceAction(this, "drawButton", "click",
-                        getFormEntryPrompt().getIndex());
-        launchActivity();
+    protected String loggerContextString() {
+        return "drawButton";
+    }
+
+    @Override
+    protected void launchActivity() {
+        super.launchDrawActivity(
+                DrawActivity.OPTION_DRAW,
+                RequestCodes.DRAW_IMAGE,
+                getContext().getString(R.string.draw_image));
     }
 }

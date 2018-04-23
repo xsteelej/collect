@@ -47,7 +47,7 @@ public class SignatureWidget extends BaseImageWidget {
 
     @Override
     protected void setupButtons() {
-        signButton = super.setupSingleButton(getContext().getString(R.string.sign_button));
+        signButton = super.setupSingleButton(getContext().getString(R.string.sign_button),R.id.simple_button);
     }
 
     @Override
@@ -56,23 +56,25 @@ public class SignatureWidget extends BaseImageWidget {
     }
 
     @Override
-    public void setOnLongClickListener(OnLongClickListener l) {
+    protected void setOnLongClickListenerForButtons(OnLongClickListener l) {
         signButton.setOnLongClickListener(l);
-        super.setOnLongClickListener(l);
     }
 
     @Override
-    public void cancelLongPress() {
-        super.cancelLongPress();
+    protected void cancelLongPressForButtons() {
         signButton.cancelLongPress();
     }
 
     @Override
-    public void onButtonClick(int buttonId) {
-        Collect.getInstance()
-                .getActivityLogger()
-                .logInstanceAction(this, "signButton", "click",
-                        getFormEntryPrompt().getIndex());
-        launchActivity();
+    protected String loggerContextString() {
+        return "signButton";
+    }
+
+    @Override
+    protected void launchActivity() {
+        super.launchDrawActivity(
+                DrawActivity.OPTION_SIGNATURE,
+                RequestCodes.SIGNATURE_CAPTURE,
+                getContext().getString(R.string.signature_capture));
     }
 }

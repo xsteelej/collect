@@ -66,15 +66,11 @@ public class AnnotateWidget extends BaseImageWidget {
     }
 
     @Override
-    protected void setUpLayout() {
-        super.setUpLayout();
-        captureButton = getSimpleButton(getContext().getString(R.string.capture_image), R.id.capture_image);
-        captureButton.setEnabled(!getFormEntryPrompt().isReadOnly());
+    protected void setupButtons() {
+        captureButton = super.setupSingleButton(getContext().getString(R.string.capture_image), R.id.capture_image);
+        chooseButton = super.setupSingleButton(getContext().getString(R.string.choose_image), R.id.choose_image);
+        annotateButton = super.setupSingleButton(getContext().getString(R.string.markup_image), R.id.markup_image);
 
-        chooseButton = getSimpleButton(getContext().getString(R.string.choose_image), R.id.choose_image);
-        chooseButton.setEnabled(!getFormEntryPrompt().isReadOnly());
-
-        annotateButton = getSimpleButton(getContext().getString(R.string.markup_image), R.id.markup_image);
         annotateButton.setEnabled(!(binaryName == null || getFormEntryPrompt().isReadOnly()));
         annotateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,17 +79,11 @@ public class AnnotateWidget extends BaseImageWidget {
                         .getActivityLogger()
                         .logInstanceAction(this, "annotateButton", "click",
                                 getFormEntryPrompt().getIndex());
-                launchAnnotateActivity();
+                launchActivity();
             }
         });
 
-        answerLayout.addView(captureButton);
-        answerLayout.addView(chooseButton);
-        answerLayout.addView(annotateButton);
-        answerLayout.addView(errorTextView);
-
         hideButtonsIfNeeded();
-        errorTextView.setVisibility(View.GONE);
     }
 
     private void launchAnnotateActivity() {

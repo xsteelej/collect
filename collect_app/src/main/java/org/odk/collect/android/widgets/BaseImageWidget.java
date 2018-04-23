@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -140,17 +141,29 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
 
     @Override
     public void setOnLongClickListener(OnLongClickListener l) {
+        setOnLongClickListenerForButtons(l);
         if (imageView != null) {
             imageView.setOnLongClickListener(l);
         }
     }
 
-    @Override
+
+    // TODO: abstract?
+    protected void setOnLongClickListenerForButtons(OnLongClickListener l) {
+    }
+
+        @Override
     public void cancelLongPress() {
+        cancelLongPressForButtons();
         super.cancelLongPress();
         if (imageView != null) {
             imageView.cancelLongPress();
         }
+    }
+
+    // TODO: abstract?
+    protected void cancelLongPressForButtons() {
+
     }
 
     protected void setUpBinary() {
@@ -184,14 +197,14 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
         launchActivity();
     }
 
+    // TODO: needs to be abstract
     protected void launchActivity() {
-        launchDrawActivity();
     }
 
-    protected void launchDrawActivity() {
+    protected void launchDrawActivity(@NonNull String extraValue, int requestCode, @NonNull String activityNotFoundText) {
         errorTextView.setVisibility(View.GONE);
         Intent i = new Intent(getContext(), DrawActivity.class);
-        i.putExtra(DrawActivity.OPTION, DrawActivity.OPTION_SIGNATURE);
+        i.putExtra(DrawActivity.OPTION, extraValue);
         // copy...
         if (binaryName != null) {
             File f = new File(getInstanceFolder() + File.separator + binaryName);
@@ -202,11 +215,10 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
 
         try {
             waitForData();
-            ((Activity) getContext()).startActivityForResult(i,
-                    ApplicationConstants.RequestCodes.SIGNATURE_CAPTURE);
+            ((Activity) getContext()).startActivityForResult(i, requestCode);
         } catch (ActivityNotFoundException e) {
             Toast.makeText(getContext(),
-                    getContext().getString(R.string.activity_not_found, getContext().getString(R.string.signature_capture)),
+                    getContext().getString(R.string.activity_not_found, activityNotFoundText),
                     Toast.LENGTH_SHORT).show();
             cancelWaitingForData();
         }
@@ -222,26 +234,40 @@ public abstract class BaseImageWidget extends QuestionWidget implements FileWidg
 
         binaryName = getFormEntryPrompt().getAnswerText();
 
+        answerLayout.addView(errorTextView);
+        errorTextView.setVisibility(View.GONE);
+
         setupButtons();
     }
 
     // TODO: decide if this should be abstract
     protected void setupButtons() {}
 
-    protected Button setupSingleButton(@NonNull String text) {
-        Button button = getSimpleButton(text);
+    protected Button setupSingleButton(@NonNull String text, @IdRes final int id) {
+        Button button = getSimpleButton(text,id);
         button.setEnabled(!getFormEntryPrompt().isReadOnly());
 
         answerLayout.addView(button);
-        answerLayout.addView(errorTextView);
 
         // and hide the sign button if read-only
         if (getFormEntryPrompt().isReadOnly()) {
             button.setVisibility(View.GONE);
         }
-        errorTextView.setVisibility(View.GONE);
 
         return button;
+    }
+
+    public void onButtonClick(int buttonId) {
+        Collect.getInstance()
+                .getActivityLogger()
+                .logInstanceAction(this, loggerContextString(), "click",
+                        getFormEntryPrompt().getIndex());
+        launchActivity();
+    }
+
+    // TODO: needs to be abstract
+    protected String loggerContextString() {
+        return "";
     }
 
 }
