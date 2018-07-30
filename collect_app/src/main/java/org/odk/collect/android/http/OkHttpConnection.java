@@ -185,10 +185,9 @@ public class OkHttpConnection implements OpenRosaHttpInterface {
 
             RequestBody requestBody = RequestBody.create(MediaType.parse(HTTP_CONTENT_TYPE_TEXT_XML), submissionFile);
 
-            MultipartBody multipartBody = new MultipartBody.Builder()
+            MultipartBody.Builder multipartBuilder = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addPart(MultipartBody.Part.createFormData("xml_submission_file", submissionFile.getName(), requestBody))
-                    .build();
+                    .addPart(MultipartBody.Part.createFormData("xml_submission_file", submissionFile.getName(), requestBody));
 
             Timber.i("added xml_submission_file: %s", submissionFile.getName());
             byteCount += submissionFile.length();
@@ -200,7 +199,7 @@ public class OkHttpConnection implements OpenRosaHttpInterface {
 
                 RequestBody fileRequestBody = RequestBody.create(MediaType.parse(mime), file);
 
-                multipartBody.parts().add(MultipartBody.Part.create(fileRequestBody));
+                multipartBuilder.addPart(MultipartBody.Part.create(fileRequestBody));
 
                 byteCount += file.length();
                 Timber.i("added file of type '%s' %s", mime, file.getName());
@@ -211,12 +210,14 @@ public class OkHttpConnection implements OpenRosaHttpInterface {
                             > 10000000L)) {
                         // the next file would exceed the 10MB threshold...
                         Timber.i("Extremely long post is being split into multiple posts");
-                        multipartBody.parts().add(MultipartBody.Part.createFormData("*isIncomplete*", "yes"));
+                        multipartBuilder.addPart(MultipartBody.Part.createFormData("*isIncomplete*", "yes"));
                         ++fileIndex; // advance over the last attachment added...
                         break;
                     }
                 }
             }
+
+            MultipartBody multipartBody = multipartBuilder.build();
 
             try {
                 OkHttpClient client = createOkHttpClient();
