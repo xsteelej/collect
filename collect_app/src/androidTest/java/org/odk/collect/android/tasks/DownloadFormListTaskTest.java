@@ -9,6 +9,7 @@ import java.util.Map;
 import okhttp3.mockwebserver.RecordedRequest;
 
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.odk.collect.android.test.TestUtils.assertMatches;
@@ -26,7 +27,7 @@ public class DownloadFormListTaskTest extends MockedServerTest {
         // then
         RecordedRequest r = nextRequest();
         assertEquals("GET", r.getMethod());
-        assertEquals("/formList", r.getPath());
+        assertTrue(r.getPath().contains("/formList"));
         assertMatches("Dalvik/.* org.odk.collect.android/.*", r.getHeader("User-Agent"));
         assertEquals("1.0", r.getHeader("X-OpenRosa-Version"));
         assertEquals("gzip", r.getHeader("Accept-Encoding"));
