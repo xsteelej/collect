@@ -150,7 +150,7 @@ public class HttpClientConnection implements OpenRosaHttpInterface {
 
     @Override
     public @NonNull
-    HttpGetResult get(@NonNull URI uri, @Nullable final String contentType, @Nullable HttpCredentialsInterface credentials) throws Exception {
+    HttpGetResult executeGetRequest(@NonNull URI uri, @Nullable final String contentType, @Nullable HttpCredentialsInterface credentials) throws Exception {
         addCredentialsForHost(uri, credentials);
         clearCookieStore();
 
@@ -233,7 +233,7 @@ public class HttpClientConnection implements OpenRosaHttpInterface {
     }
 
     @Override
-    public @NonNull HttpHeadResult head(@NonNull URI uri, @Nullable HttpCredentialsInterface credentials) throws Exception {
+    public @NonNull HttpHeadResult executeHeadRequest(@NonNull URI uri, @Nullable HttpCredentialsInterface credentials) throws Exception {
         addCredentialsForHost(uri, credentials);
         clearCookieStore();
 
