@@ -24,7 +24,7 @@ import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.dto.Instance;
 import org.odk.collect.android.http.HttpHeadResult;
 import org.odk.collect.android.http.OpenRosaHttpInterface;
-import org.odk.collect.android.preferences.PreferenceKeys;
+import org.odk.collect.android.preferences.GeneralKeys;
 import org.odk.collect.android.utilities.FileUtils;
 import org.odk.collect.android.utilities.ResponseMessageParser;
 import org.odk.collect.android.utilities.WebCredentialsUtils;
@@ -72,6 +72,8 @@ public class InstanceServerUploader extends InstanceUploader {
         // Used to determine if attachments should be sent for Aggregate < 0.9x servers
         boolean openRosaServer = false;
 
+        long contentLength = 10000000L;
+
         // We already issued a head request and got a response, so we know it was an
         // OpenRosa-compliant server. We also know the proper URL to send the submission to and
         // the proper scheme.
@@ -100,6 +102,16 @@ public class InstanceServerUploader extends InstanceUploader {
             try {
                 headResult = httpInterface.head(uri, webCredentialsUtils.getCredentials(uri));
                 responseHeaders = headResult.getHeaders();
+
+                if (responseHeaders.containsKey("X-OpenRosa-Accept-Content-Length")) {
+                    String contentLengthString = responseHeaders.get("X-OpenRosa-Accept-Content-Length");
+                    try {
+                        contentLength = Long.parseLong(contentLengthString);
+                    } catch (Exception e) {
+                        Timber.e(e, "Exception thrown parsing contentLength %s", contentLengthString);
+                    }
+                }
+
             } catch (Exception e) {
                 saveFailedStatusToDatabase(instance);
                 throw new UploadException(FAIL
@@ -181,7 +193,7 @@ public class InstanceServerUploader extends InstanceUploader {
             URI uri = URI.create(submissionUri.toString());
 
             messageParser = httpInterface.uploadSubmissionFile(files, submissionFile, uri,
-                    webCredentialsUtils.getCredentials(uri));
+                    webCredentialsUtils.getCredentials(uri), contentLength);
 
             int responseCode = messageParser.getResponseCode();
 
@@ -300,7 +312,7 @@ public class InstanceServerUploader extends InstanceUploader {
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(
                 Collect.getInstance());
-        String serverBase = settings.getString(PreferenceKeys.KEY_SERVER_URL,
+        String serverBase = settings.getString(GeneralKeys.KEY_SERVER_URL,
                 app.getString(R.string.default_server_url));
 
         if (serverBase.endsWith(URL_PATH_SEP)) {
@@ -308,7 +320,7 @@ public class InstanceServerUploader extends InstanceUploader {
         }
 
         // NOTE: /submission must not be translated! It is the well-known path on the server.
-        String submissionPath = settings.getString(PreferenceKeys.KEY_SUBMISSION_URL,
+        String submissionPath = settings.getString(GeneralKeys.KEY_SUBMISSION_URL,
                 app.getString(R.string.default_odk_submission));
 
         if (!submissionPath.startsWith(URL_PATH_SEP)) {
